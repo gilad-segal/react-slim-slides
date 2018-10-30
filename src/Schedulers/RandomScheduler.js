@@ -24,15 +24,9 @@ const shuffle = array => {
 
 export class RandomScheduler extends LinearScheduler {
   constructor({items = [], startIndex = 0, ...restParams}) {
-    const shuffledItems = shuffle(items);
-    super({items: shuffledItems, ...restParams});
-
-    // move to a function and call straight in ctor initializer
-    // let itemsFinal = [];
-
-    // if (items.length > 0) {
-    //   const [firstItem, ...restItem] = items;
-    //   itemsFinal = [firstItem, ...shuffle(restItem)];
-    // }
+    let itemsCopy = items.slice();
+    let finalItems = [...itemsCopy.splice(startIndex, 1), ...shuffle(itemsCopy)];
+    
+    super({items: finalItems, ...restParams});
   }
 }

@@ -2,6 +2,14 @@ export const sliceToStart = (arr, fromIndex) => {
   return [...arr.slice(fromIndex), ...arr.slice(0, fromIndex)];
 };
 
+export const runTimes = (cb, times) =>  { // add test here
+  for (let i = 0; i < times - 1; i++) {
+    cb();
+  }
+
+  return cb();
+}
+
 export const deferItem = ({duration, item}) => {
   let timeoutHandler;
   let rejectHandler;

@@ -67,7 +67,7 @@ describe('utils', () => {
       );
     });
 
-    it('should throw when cancel is called after duration has elaped', () => {
+    it('should throw when cancel is called after duration has elapsed', () => {
       const {cancel} = deferItem({duration: 4000, item: 10});
       jest.advanceTimersByTime(4000);
       expect(() => cancel()).toThrow();

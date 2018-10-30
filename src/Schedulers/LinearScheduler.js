@@ -1,4 +1,4 @@
-import {ReadOnlyQueue, deferItem} from '../common';
+import {ReadOnlyQueue, deferItem, runTimes} from '../common';
 
 const nextTickKey = Symbol('nextTickKey');
 const isTickPendingKey = Symbol('isTickPendingKey');
@@ -23,10 +23,8 @@ export class LinearScheduler {
     return this[isTickPendingKey];
   }
 
-  tick = async () => {
-    if (this[nextTickKey] && !this[nextTickKey].isResolved()) {
-      this[nextTickKey].cancel();
-    }
+  tick = async ({times = 1} = {}) => {
+    this.cancelPendingTick();
 
     if (this.remainingItemsCount === 0) {
       this[isTickPendingKey] = false;
@@ -36,11 +34,17 @@ export class LinearScheduler {
     this[isTickPendingKey] = true;
     this[nextTickKey] = deferItem({
       duration: this[durationKey],
-      item: this[itemsQueueKey].dequeue()
+      item: runTimes(() => this[itemsQueueKey].dequeue(), times)
     });
 
     const resolvedItem = await this[nextTickKey].promise;
     this[isTickPendingKey] = false;
     return resolvedItem;
   };
+
+  cancelPendingTick = () => {
+    if (this[nextTickKey] && !this[nextTickKey].isResolved()) {
+      this[nextTickKey].cancel();
+    }
+  }
 }

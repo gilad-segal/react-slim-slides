@@ -56,6 +56,14 @@ describe('LinearScheduler', () => {
       expect(scheduler.remainingItemsCount).toEqual(1);
     });
 
+    it('should remove multiple items', async () => {
+      const scheduler = new LinearScheduler({items: [1,2,3,4,5,6,7], duration: 200});
+      const tick = scheduler.tick({times: 4});
+      jest.advanceTimersByTime(200);
+      await expect(tick).resolves.toBe(4);
+      expect(scheduler.remainingItemsCount).toBe(3);
+    });
+
     it('should reject tick when there are no items left', async () => {
       const scheduler = new LinearScheduler({items: []});
       await expect(scheduler.tick()).rejects.toEqual(
@@ -70,6 +78,15 @@ describe('LinearScheduler', () => {
       scheduler.tick();
 
       await expect(previousTick).rejects.toEqual(
+        'deferred item promise was cancelled'
+      );
+    });
+
+    it('should reject pending tick when cancelPendingTick is called', async () => {
+      const scheduler = new LinearScheduler({items: [1, 2, 3]});
+      const pendingTick = scheduler.tick();
+      scheduler.cancelPendingTick();
+      await expect(pendingTick).rejects.toEqual(
         'deferred item promise was cancelled'
       );
     });

@@ -35,6 +35,15 @@ describe('ReadOnlyQueue', () => {
     expect(queue.length).toEqual(2);
   });
 
+  it('should restore dequeued item', () => {
+    const queue = new ReadOnlyQueue([3, 2, 1, 1]);
+    queue.dequeue();
+    queue.restoreItems(1);
+    
+    expect(queue.peek()).toEqual(3);
+    expect(queue.length).toEqual(4);
+  });
+
   it('should throw when dequeuing an empty queue', () => {
     const queue = new ReadOnlyQueue([]);
     expect(() => queue.dequeue()).toThrow();

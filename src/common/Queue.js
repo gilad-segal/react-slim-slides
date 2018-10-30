@@ -4,12 +4,11 @@ const isCircularKey = Symbol('isCircularKey');
 const itemsRemoved = Symbol('itemsRemovedKey');
 
 export class ReadOnlyQueue {
-  [itemsRemoved] = 0;
+  [itemsIndex] = 0;
 
-  constructor(items = [], isCircular = false, startIndex = 0) {
+  constructor(items = [], isCircular = false) {
     this[itemsKey] = items.slice();
     this[isCircularKey] = isCircular;
-    this[itemsIndex] = startIndex;
   }
 
   dequeue() {
@@ -17,11 +16,27 @@ export class ReadOnlyQueue {
       throw new QueueError('Cannot dequeue an empty queue');
     }
 
-    if (!this[isCircularKey]) {
-      this[itemsRemoved]++;
+    return this[itemsKey][this[itemsIndex]++ % this[itemsKey].length];
+  }
+
+  restoreItems(count) {
+    if (count < 0) { // add test here
+      count = 0;
     }
 
-    return this[itemsKey][this[itemsIndex]++ % this[itemsKey].length];
+    if (this[isCircularKey]) { // add test for huge numbers
+      count = count % this[itemsKey].length;
+    }
+
+    if (this[itemsIndex] - count < 0) { // add test for exception
+      throw new QueueError('Tried to restore non existing item')
+    }
+
+    this[itemsIndex] -= count;
+    
+    if (this[itemsIndex] < 0) { // does this work?
+      this[itemsIndex] = this[itemsIndex].length - this[itemsIndex];
+    }
   }
 
   peek() {
@@ -29,11 +44,19 @@ export class ReadOnlyQueue {
   }
 
   get isEmpty() {
-    return this[itemsKey].length === this[itemsRemoved];
+    if (this[isCircularKey]) {
+      return this[itemsKey].length === 0; 
+    }
+
+    return this[itemsKey].length === this[itemsIndex];
   }
 
   get length() {
-    return this[itemsKey].length - this[itemsRemoved];
+    if (this[isCircularKey]) {
+      return this[itemsKey].length;
+    }
+
+    return this[itemsKey].length - this[itemsIndex];
   }
 }
 
